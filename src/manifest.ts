@@ -38,6 +38,7 @@ export default defineManifest({
     "offscreen",
     "storage",
     "tabs",
+    "declarativeNetRequest",
   ],
   host_permissions: ["<all_urls>"],
   content_security_policy: {
@@ -46,7 +47,7 @@ export default defineManifest({
   },
   web_accessible_resources: [
     {
-      resources: ["src/content/page-script.ts", "icons/*", "ffmpeg/*"],
+      resources: ["page-script.js", "icons/*", "ffmpeg/*"],
       matches: ["<all_urls>"],
     },
   ],

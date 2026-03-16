@@ -7,6 +7,7 @@ import type {
 import { VideoType, QUALITY_MAP } from "@/types";
 
 const BILIBILI_API = "https://api.bilibili.com";
+const LOG = "[VDExtension Bili]";
 
 interface PlayUrlResponse {
   code: number;
@@ -73,13 +74,17 @@ export async function getBilibiliVideoInfo(
 ): Promise<BilibiliVideoInfo> {
   const bvid = extractBvid(pageUrl);
   if (!bvid) throw new Error("无法从URL中提取BV号");
+  console.log(LOG, "getBilibiliVideoInfo bvid:", bvid);
 
   const viewData = await fetchVideoView(bvid);
+  console.log(LOG, "viewData code:", viewData.code, "title:", viewData.data?.title);
   const pageNum = extractPageNumber(pageUrl);
   const page = viewData.data.pages[pageNum - 1] || viewData.data.pages[0];
   const cid = page.cid;
+  console.log(LOG, "cid:", cid, "page:", pageNum);
 
   const playData = await fetchPlayUrl(bvid, cid);
+  console.log(LOG, "playData code:", playData.code, "hasDash:", !!playData.data?.dash, "hasDurl:", !!playData.data?.durl);
   if (playData.code !== 0) {
     throw new Error(`PlayURL API 返回错误: code=${playData.code}`);
   }
@@ -198,16 +203,15 @@ export function bilibiliInfoToVideoInfo(
 }
 
 async function fetchVideoView(bvid: string): Promise<VideoViewResponse> {
-  const resp = await fetch(
-    `${BILIBILI_API}/x/web-interface/view?bvid=${bvid}`,
-    {
-      credentials: "include",
-      headers: {
-        Referer: "https://www.bilibili.com",
-      },
-    },
-  );
-  return resp.json();
+  const url = `${BILIBILI_API}/x/web-interface/view?bvid=${bvid}`;
+  console.log(LOG, "fetchVideoView:", url);
+  const resp = await fetch(url, {
+    credentials: "include",
+  });
+  console.log(LOG, "fetchVideoView status:", resp.status);
+  const data = await resp.json();
+  console.log(LOG, "fetchVideoView response code:", data.code, "message:", data.message);
+  return data;
 }
 
 async function fetchPlayUrl(
@@ -224,16 +228,15 @@ async function fetchPlayUrl(
     fourk: "1",
   });
 
-  const resp = await fetch(
-    `${BILIBILI_API}/x/player/playurl?${params.toString()}`,
-    {
-      credentials: "include",
-      headers: {
-        Referer: "https://www.bilibili.com",
-      },
-    },
-  );
-  return resp.json();
+  const url = `${BILIBILI_API}/x/player/playurl?${params.toString()}`;
+  console.log(LOG, "fetchPlayUrl:", url);
+  const resp = await fetch(url, {
+    credentials: "include",
+  });
+  console.log(LOG, "fetchPlayUrl status:", resp.status);
+  const data = await resp.json();
+  console.log(LOG, "fetchPlayUrl response code:", data.code);
+  return data;
 }
 
 /**

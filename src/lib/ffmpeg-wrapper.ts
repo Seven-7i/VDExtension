@@ -1,5 +1,4 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { toBlobURL } from "@ffmpeg/util";
 
 let ffmpeg: FFmpeg | null = null;
 
@@ -16,16 +15,14 @@ export async function getFFmpeg(): Promise<FFmpeg> {
     console.log("[FFmpeg] progress:", Math.round(progress * 100) + "%");
   });
 
-  const coreURL = await toBlobURL(
-    chrome.runtime.getURL("ffmpeg/ffmpeg-core.js"),
-    "text/javascript",
-  );
-  const wasmURL = await toBlobURL(
-    chrome.runtime.getURL("ffmpeg/ffmpeg-core.wasm"),
-    "application/wasm",
-  );
+  const coreURL = chrome.runtime.getURL("ffmpeg/ffmpeg-core.js");
+  const wasmURL = chrome.runtime.getURL("ffmpeg/ffmpeg-core.wasm");
+
+  console.log("[FFmpeg] Loading with coreURL:", coreURL);
+  console.log("[FFmpeg] Loading with wasmURL:", wasmURL);
 
   await ffmpeg.load({ coreURL, wasmURL });
+  console.log("[FFmpeg] Loaded successfully");
   return ffmpeg;
 }
 
